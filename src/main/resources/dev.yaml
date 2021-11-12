@@ -9,6 +9,9 @@ db:
   username: "sql6447382" 
   password: "qBqewZ1CGl"
   database-name: "sql6447382"
+  reconnection-strategy-frequency-ms : "2000"
+  reconnection-strategy-attempts : "2"
+  
   
 mule:
   env: "dev"
@@ -18,6 +21,7 @@ soap:
   address: "http://localhost:8081/ticket-booking-service/ticket-booking-serviceSOAP"
   service: "ticket-booking-service"
   port: "ticket-booking-serviceSOAP"
+  wsdlFileLocation: "bookmyshow-order-management.wsdl"
 
 json:
   logger:

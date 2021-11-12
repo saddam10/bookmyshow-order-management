@@ -74,6 +74,9 @@
 						<formats>
 							<format>html</format>
 						</formats>
+						<ignoreFlows>
+							<ignoreFlow>bookmyshow-console</ignoreFlow>
+						</ignoreFlows>
 					</coverage>
 				</configuration>
 			</plugin>

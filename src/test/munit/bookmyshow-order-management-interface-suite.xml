@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="bookmyshow-order-management-interface-suite.xml" />
+	<munit:test name="api-main-test" doc:id="46934116-9ede-4230-aa5e-3609eead386e" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock SOAP Router" doc:id="a4ebe69d-0bae-4b46-84f8-2a9e28146635" processor="apikit-soap:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="de848401-1c85-4028-b518-45255b88ed43" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output text/xml --- readUrl('classpath://apimaintest\mock_payload.dwl')]" mediaType="text/xml" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://apimaintest\mock_attributes.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="discountAmount" value="#[output application/java --- readUrl('classpath://apimaintest\mock_variable_.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="amount" value="#[output application/java --- readUrl('classpath://apimaintest\mock_variable_1.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="ffb024e1-6299-4c77-9e88-7a8267487aad" >
+				<munit:payload value="#[output text/xml --- readUrl('classpath://apimaintest\set-event_payload.dwl')]" encoding="UTF-8" mediaType="text/xml" />
+				<munit:attributes value="#[readUrl('classpath://apimaintest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to api-main" doc:id="dc6c8bbc-2e85-4a28-9b24-2b5717fbd74f" name="api-main"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="3df4306d-b4ea-4c92-be3f-ea4d5ec0e817" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import apimaintest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="getDiscount:\soapkit-config-test" doc:id="d7b7e156-1541-4d25-ab81-2436bf05c69b" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="7d3598d6-33ee-4425-8853-73bf25b2fceb" >
+				<munit:payload value="#[output application/java --- readUrl('classpath://getDiscountsoapkitconfigtest\set-event_payload.dwl')]" mediaType="application/java" />
+				<munit:attributes value="#[output application/java --- readUrl('classpath://getDiscountsoapkitconfigtest\set-event_attributes.dwl')]" mediaType="application/java" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to getDiscount:\soapkit-config" doc:id="8551cd43-dc6c-4ced-b9b7-4515760b9ead" name="getDiscount:\soapkit-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="f5de694d-4801-42bb-b3f5-28ab7d3caf24" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import getDiscountsoapkitconfigtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Flow Reference" doc:id="2752ca5f-6f3a-4821-b112-539ccd4d025d" processor="flow-ref" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="71fa4b3d-4617-4395-b6f6-45e3b5907280" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="bookTicket:\soapkit-config-test" doc:id="5820453e-452a-4614-9da6-6d6e51b6855e" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Flow Reference" doc:id="abb5edcc-ad5b-4c9c-96e8-ef32c2cc7233" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="93d3b748-126c-4564-86b3-25210e97c11b" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://bookTicketsoapkitconfigtest\mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:attributes value="#[output application/java --- readUrl('classpath://bookTicketsoapkitconfigtest\mock_attributes.dwl')]" mediaType="application/java" />
+					<munit-tools:variables >
+						<munit-tools:variable key="bookingID" value="#[output application/java --- readUrl('classpath://bookTicketsoapkitconfigtest\mock_variable_.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit:set-event doc:name="Set Input" doc:id="4689dd45-280d-4c73-be3d-acce3177b19c" >
+				<munit:payload value="#[output application/java --- readUrl('classpath://bookTicketsoapkitconfigtest\set-event_payload.dwl')]" mediaType="application/java" />
+				<munit:attributes value="#[output application/java --- readUrl('classpath://bookTicketsoapkitconfigtest\set-event_attributes.dwl')]" mediaType="application/java" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to bookTicket:\soapkit-config" doc:id="347ad506-8c88-4a8d-b0f0-e200ecadfff2" name="bookTicket:\soapkit-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="d47f6f47-c55e-4838-ac1b-b0856989e9a8" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import bookTicketsoapkitconfigtest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

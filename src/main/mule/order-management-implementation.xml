@@ -14,13 +14,14 @@ http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/m
 		name="book-ticket"
 		doc:id="b5dbcc54-7d5c-4725-96b2-655133cc649c"
 	>
+		<json-logger:logger doc:name="Start Log" doc:id="c34dd154-f6e9-45f1-9269-7f54cf2d822b" config-ref="JSON_Logger_Config" message="Request received for  SOAP operation Book Ticket"/>
 		<set-variable
 			value="#[uuid()]"
-			doc:name="Set Variable"
+			doc:name="bookingID"
 			doc:id="4f8e51ea-4c40-4bc7-875e-5ffb1c2e2c79"
 			variableName="bookingID" />
 		<ee:transform
-			doc:name="Transform Message"
+			doc:name="Create Insert Payload"
 			doc:id="8713282e-8626-4db5-815e-1136bd47098e"
 		>
 			<ee:message>
@@ -48,7 +49,7 @@ ns ns0 http://localhost:8081/ticket-booking-service/
 			</ee:variables>
 		</ee:transform>
 		<db:insert
-			doc:name="Insert"
+			doc:name="Insert Record Into Booking Table"
 			doc:id="db0c5713-009a-4421-af70-a263775da3e5"
 			config-ref="Database_Config"
 		>
@@ -58,7 +59,7 @@ VALUES (:mobileNumber,:movieID,:showID,:audio,:format,:theaterID,:bookingTime,:n
 			<db:input-parameters><![CDATA[#[payload]]]></db:input-parameters>
 		</db:insert>
 		<ee:transform
-			doc:name="Transform Message"
+			doc:name="Transform Message To Response Payload"
 			doc:id="95a73abf-9559-47c6-bdde-b6cbe100bc9f"
 		>
 			<ee:message>
@@ -80,6 +81,7 @@ var recordUpdated= if(payload.affectedRows==1) 1 else 0
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<json-logger:logger doc:name="End Log" doc:id="729212d1-6460-49d0-926e-315b38eb5925" config-ref="JSON_Logger_Config" message="Response for  SOAP operation Book Ticket"/>
 		<error-handler>
 			<on-error-continue
 				enableNotifications="true"
@@ -88,7 +90,7 @@ var recordUpdated= if(payload.affectedRows==1) 1 else 0
 				doc:id="3d721c86-0568-49ac-854c-7d7922b04f61"
 			>
 				<ee:transform
-					doc:name="Transform Message"
+					doc:name="Transform Message To Error Response Payload"
 					doc:id="443b3210-53e2-472b-8270-a71257816c3d"
 				>
 					<ee:message>
@@ -109,7 +111,7 @@ ns ns0 http://localhost:8081/ticket-booking-service/
 					<ee:variables>
 					</ee:variables>
 				</ee:transform>
-				<json-logger:logger doc:name="Logger" doc:id="215869e1-a2c3-4caf-b8db-f9425b5766f6" config-ref="JSON_Logger_Config" message='"Error message"' tracePoint="EXCEPTION">
+				<json-logger:logger doc:name="Error Log" doc:id="215869e1-a2c3-4caf-b8db-f9425b5766f6" config-ref="JSON_Logger_Config" message='"Error message"' tracePoint="EXCEPTION">
 					<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
 {
     payload: JSONLoggerModule::stringifyNonJSON(payload.body) 
@@ -123,13 +125,14 @@ ns ns0 http://localhost:8081/ticket-booking-service/
 		name="check-discount"
 		doc:id="909ed0d9-514d-4c37-b62b-cfc174fdbc30"
 	>
+		<json-logger:logger doc:name="Start Log" doc:id="7107b051-b0cd-4c94-b7d5-88a8dfad79ad" config-ref="JSON_Logger_Config" message="Request received for  SOAP operation Get Discount"/>
 		<set-variable
 			value="#[output application/java&#10;ns ns0 http://localhost:8081/ticket-booking-service/&#10;---&#10;payload.body.ns0#getDiscount.amountPayable]"
 			doc:name="amount"
 			doc:id="8d3e8472-9221-4383-ba93-fca4fb78f90e"
 			variableName="amount" />
 		<db:select
-			doc:name="Select"
+			doc:name="Get Discount Percentage"
 			doc:id="7d42119e-08ec-422a-8087-57c063e56105"
 			config-ref="Database_Config"
 		>
@@ -152,7 +155,7 @@ ns ns0 http://localhost:8081/ticket-booking-service/
 			doc:name="Logger"
 			doc:id="4d65a052-f3c0-4a82-b506-ed370a72323a"
 			message="#[payload]" />
-		<ee:transform doc:id="690ed2e1-2204-4243-9258-84f78c70c139">
+		<ee:transform doc:id="690ed2e1-2204-4243-9258-84f78c70c139" doc:name="Transform Message To Response Payload">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/java
@@ -170,6 +173,7 @@ ns soap http://schemas.xmlsoap.org/soap/envelope/
 				</ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<json-logger:logger doc:name="End Log" doc:id="8a3d2468-98f6-4427-9bb7-ccb1272caa46" config-ref="JSON_Logger_Config" message="Response for  SOAP operation Get Discount" tracePoint="END"/>
 		<error-handler>
 			<on-error-continue
 				enableNotifications="true"
@@ -178,7 +182,7 @@ ns soap http://schemas.xmlsoap.org/soap/envelope/
 				doc:id="d21b8fdc-a0be-4ec9-8121-8923d3d8af91"
 			>
 				<ee:transform
-					doc:name="Transform Message"
+					doc:name="Transform Message To Error Response Payload"
 					doc:id="527c9c5b-5037-4b6d-a535-903c7d9661fd"
 				>
 					<ee:message>
@@ -199,7 +203,7 @@ ns ns0 http://localhost:8081/ticket-booking-service/
 					<ee:variables>
 					</ee:variables>
 				</ee:transform>
-				<json-logger:logger doc:name="Logger" doc:id="467f4330-4b04-4c79-b518-114777d7877c" config-ref="JSON_Logger_Config" message='"Error message"' tracePoint="EXCEPTION">
+				<json-logger:logger doc:name="Error Log" doc:id="467f4330-4b04-4c79-b518-114777d7877c" config-ref="JSON_Logger_Config" message='"Error message"' tracePoint="EXCEPTION">
 					<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
 {
     payload: JSONLoggerModule::stringifyNonJSON(payload.body) 
