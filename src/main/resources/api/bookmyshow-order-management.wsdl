@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:tns="http://localhost:8081/ticket-booking-service/"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	name="ticket-booking-service"
+	targetNamespace="http://localhost:8081/ticket-booking-service/">
+	<wsdl:types>
+		<xsd:schema
+			targetNamespace="http://localhost:8081/ticket-booking-service/">
+			<xsd:element name="bookTicket">
+				<xsd:complexType>
+					<xsd:sequence>
+
+						<xsd:element name="mobileNumber" type="xsd:int"></xsd:element>
+						<xsd:element name="movieID" type="xsd:int"></xsd:element>
+						<xsd:element name="showID" type="xsd:int"></xsd:element>
+						<xsd:element name="audio" type="xsd:string"></xsd:element>
+						<xsd:element name="format" type="xsd:string"></xsd:element>
+						<xsd:element name="theaterID" type="xsd:int"></xsd:element>
+						<xsd:element name="bookingTime" type="xsd:dateTime"></xsd:element>
+						<xsd:element name="netAmount" type="xsd:double"></xsd:element>
+						<xsd:element name="showTiming" type="xsd:dateTime"></xsd:element>
+						<xsd:element name="numberOfSeats" type="xsd:int"></xsd:element>
+						<xsd:element name="seatNumbers" minOccurs="0"
+							type="tns:seatNumber" maxOccurs="1">
+						</xsd:element>
+
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="bookTicketResponse">
+				<xsd:complexType>
+
+					<xsd:sequence>
+						<xsd:element name="success" type="xsd:int"></xsd:element>
+						<xsd:element name="message" type="xsd:string"></xsd:element>
+						<xsd:element name="bookingID" type="xsd:string"></xsd:element>
+							
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:element name="getDiscount">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="showID" type="xsd:int"></xsd:element>
+						<xsd:element name="numberOfSeats" type="xsd:int"></xsd:element>
+						<xsd:element name="amountPayable" type="xsd:double"></xsd:element>	
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="getDiscountResponse">
+				<xsd:complexType>
+					<xsd:sequence> 
+						<xsd:element name="discountFlag" type="xsd:string"></xsd:element>
+						<xsd:element name="discountAmount" type="xsd:string"></xsd:element>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+
+			<xsd:complexType name="seatNumber">
+				<xsd:sequence>
+					<xsd:element name="seatNumber" type="xsd:string"
+						minOccurs="1" maxOccurs="unbounded"></xsd:element>
+				</xsd:sequence>
+			</xsd:complexType>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="bookTicketRequest">
+		<wsdl:part element="tns:bookTicket" name="parameters" />
+	</wsdl:message>
+	<wsdl:message name="bookTicketResponse">
+		<wsdl:part element="tns:bookTicketResponse"
+			name="parameters" />
+	</wsdl:message>
+	<wsdl:message name="getDiscountRequest">
+		<wsdl:part name="parameters" element="tns:getDiscount"></wsdl:part>
+	</wsdl:message>
+	<wsdl:message name="getDiscountResponse">
+		<wsdl:part name="parameters"
+			element="tns:getDiscountResponse"></wsdl:part>
+	</wsdl:message>
+	<wsdl:portType name="ticket-booking-service">
+		<wsdl:operation name="bookTicket">
+			<wsdl:input message="tns:bookTicketRequest" />
+			<wsdl:output message="tns:bookTicketResponse" />
+		</wsdl:operation>
+		<wsdl:operation name="getDiscount">
+			<wsdl:input message="tns:getDiscountRequest"></wsdl:input>
+			<wsdl:output message="tns:getDiscountResponse"></wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="ticket-booking-serviceSOAP"
+		type="tns:ticket-booking-service">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="bookTicket">
+			<soap:operation
+				soapAction="http://localhost:8081/ticket-booking-service/bookTicket" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getDiscount">
+			<soap:operation
+				soapAction="http://localhost:8081/ticket-booking-service/getDiscount" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="ticket-booking-service">
+		<wsdl:port binding="tns:ticket-booking-serviceSOAP"
+			name="ticket-booking-serviceSOAP">
+			<soap:address location="http://localhost:8081/" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

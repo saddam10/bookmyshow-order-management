@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:apikit-soap="http://www.mulesoft.org/schema/mule/apikit-soap"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger 
+http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/apikit-soap 
+http://www.mulesoft.org/schema/mule/apikit-soap/current/mule-apikit-soap.xsd"
+>
+	<db:config
+		name="Database_Config"
+		doc:name="Database Config"
+		doc:id="ce80dc36-de8e-4aba-8819-42993e53a92e"
+	>
+		<db:my-sql-connection
+			host="${db.host}"
+			port="${db.port}"
+			user="${db.username}"
+			password="${db.password}"
+			database="${db.database-name}" />
+	</db:config>
+	<json-logger:config
+		name="JSON_Logger_Config"
+		doc:name="JSON Logger Config"
+		doc:id="c134c128-7e30-42ef-b1c3-ed6f76587d74"
+		environment="${mule.env}"
+		parseContentFieldsInJsonOutput="false" />
+	<global-property
+		doc:name="Global Property"
+		doc:id="8099ffd0-b4d6-4715-a662-d5f13057c226"
+		name="mule.env"
+		value="dev" />
+	<configuration-properties
+		doc:name="Configuration properties"
+		doc:id="8c060561-2328-4cab-8168-1cd821918ec9"
+		file="${mule.env}.yaml" />
+	<http:listener-config name="api-httpListenerConfig">
+		<http:listener-connection
+			host="0.0.0.0"
+			port="8081" />
+	</http:listener-config>
+	<apikit-soap:config
+		httpStatusVarName="httpStatus"
+		name="soapkit-config"
+		port="ticket-booking-serviceSOAP"
+		service="ticket-booking-service"
+		wsdlLocation="bookmyshow-order-management.wsdl" />
+</mule>

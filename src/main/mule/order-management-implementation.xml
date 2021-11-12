@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<flow
+		name="book-ticket"
+		doc:id="b5dbcc54-7d5c-4725-96b2-655133cc649c"
+	>
+		<set-variable
+			value="#[uuid()]"
+			doc:name="Set Variable"
+			doc:id="4f8e51ea-4c40-4bc7-875e-5ffb1c2e2c79"
+			variableName="bookingID" />
+		<ee:transform
+			doc:name="Transform Message"
+			doc:id="8713282e-8626-4db5-815e-1136bd47098e"
+		>
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns ns0 http://localhost:8081/ticket-booking-service/
+---
+{
+	mobileNumber: payload.body.ns0#bookTicket.mobileNumber as Number,
+	movieID: payload.body.ns0#bookTicket.movieID as Number,
+	showID: payload.body.ns0#bookTicket.showID as Number,
+	audio: payload.body.ns0#bookTicket.audio default "",
+	format: payload.body.ns0#bookTicket.format default "",
+	theaterID: payload.body.ns0#bookTicket.theaterID as Number,
+	bookingTime: payload.body.ns0#bookTicket.bookingTime as DateTime as String { format : "yyyy-MM-dd'T'HH:mm:ss" } default "",
+	netAmount: payload.body.ns0#bookTicket.netAmount as Number,
+	showTiming: payload.body.ns0#bookTicket.showTiming as DateTime as String { format : "yyyy-MM-dd'T'HH:mm:ss" } default "",
+	numberOfSeats: payload.body.ns0#bookTicket.numberOfSeats as Number,
+	seatNumbers: payload.body.ns0#bookTicket.seatNumbers.*seatNumber joinBy  "," as String default "",
+	bookingID: vars.bookingID
+	
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<db:insert
+			doc:name="Insert"
+			doc:id="db0c5713-009a-4421-af70-a263775da3e5"
+			config-ref="Database_Config"
+		>
+			<db:sql><![CDATA[INSERT INTO booking (mobileNumber, movieID, showID, audio, format, theaterID, bookingTime, netAmount, 
+showTiming, numberOfSeats, seatNumbers,bookingID) 
+VALUES (:mobileNumber,:movieID,:showID,:audio,:format,:theaterID,:bookingTime,:netAmount,:showTiming,:numberOfSeats, :seatNumbers,:bookingID)]]></db:sql>
+			<db:input-parameters><![CDATA[#[payload]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform
+			doc:name="Transform Message"
+			doc:id="95a73abf-9559-47c6-bdde-b6cbe100bc9f"
+		>
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+ns ns0 http://localhost:8081/ticket-booking-service/
+
+var recordUpdated= if(payload.affectedRows==1) 1 else 0
+---
+{
+	body: {
+		ns0#bookTicketResponse: {
+			success: recordUpdated,
+			message: "Ticket booking successful",
+			bookingID: vars.bookingID
+
+		}
+	} write "application/xml"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler>
+			<on-error-continue
+				enableNotifications="true"
+				logException="true"
+				doc:name="On Error Continue"
+				doc:id="3d721c86-0568-49ac-854c-7d7922b04f61"
+			>
+				<ee:transform
+					doc:name="Transform Message"
+					doc:id="443b3210-53e2-472b-8270-a71257816c3d"
+				>
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+ns ns0 http://localhost:8081/ticket-booking-service/
+---
+{
+	body: {
+		ns0#bookTicketResponse: {
+			success: 0,
+			message: error.description,
+			errorType: error.errorType.identifier
+		}
+	} write "application/xml"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+					</ee:variables>
+				</ee:transform>
+				<json-logger:logger doc:name="Logger" doc:id="215869e1-a2c3-4caf-b8db-f9425b5766f6" config-ref="JSON_Logger_Config" message='"Error message"' tracePoint="EXCEPTION">
+					<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    payload: JSONLoggerModule::stringifyNonJSON(payload.body) 
+}]]]></json-logger:content>
+				</json-logger:logger>
+			
+</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow
+		name="check-discount"
+		doc:id="909ed0d9-514d-4c37-b62b-cfc174fdbc30"
+	>
+		<set-variable
+			value="#[output application/java&#10;ns ns0 http://localhost:8081/ticket-booking-service/&#10;---&#10;payload.body.ns0#getDiscount.amountPayable]"
+			doc:name="amount"
+			doc:id="8d3e8472-9221-4383-ba93-fca4fb78f90e"
+			variableName="amount" />
+		<db:select
+			doc:name="Select"
+			doc:id="7d42119e-08ec-422a-8087-57c063e56105"
+			config-ref="Database_Config"
+		>
+			<db:sql><![CDATA[select discountPercentage from discount 
+where showID= :showID]]></db:sql>
+			<db:input-parameters><![CDATA[#[output application/java
+ns ns0 http://localhost:8081/ticket-booking-service/
+---
+{
+	showID : payload.body.ns0#getDiscount.showID
+}]]]></db:input-parameters>
+		</db:select>
+		<set-variable
+			value="#[(vars.amount * (payload.discountPercentage[0] / 100) * 1.5) as Number]"
+			doc:name="discountAmount"
+			doc:id="10eeb403-2c25-4895-a056-3b999555b608"
+			variableName="discountAmount" />
+		<logger
+			level="INFO"
+			doc:name="Logger"
+			doc:id="4d65a052-f3c0-4a82-b506-ed370a72323a"
+			message="#[payload]" />
+		<ee:transform doc:id="690ed2e1-2204-4243-9258-84f78c70c139">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+---
+{
+	body: {
+		soap#getDiscountResponse: {
+			"success": 1,
+			"discountFlag": "Y",
+			"discountAmount ": vars.discountAmount
+		}
+	} write "application/xml"
+}]]>
+				</ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler>
+			<on-error-continue
+				enableNotifications="true"
+				logException="true"
+				doc:name="On Error Continue"
+				doc:id="d21b8fdc-a0be-4ec9-8121-8923d3d8af91"
+			>
+				<ee:transform
+					doc:name="Transform Message"
+					doc:id="527c9c5b-5037-4b6d-a535-903c7d9661fd"
+				>
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+ns ns0 http://localhost:8081/ticket-booking-service/
+---
+{
+	body: {
+		ns0#getDiscountResponse: {
+			success: 0,
+			message: error.description,
+			errorType: error.errorType.identifier
+		}
+	} write "application/xml"
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+					</ee:variables>
+				</ee:transform>
+				<json-logger:logger doc:name="Logger" doc:id="467f4330-4b04-4c79-b518-114777d7877c" config-ref="JSON_Logger_Config" message='"Error message"' tracePoint="EXCEPTION">
+					<json-logger:content ><![CDATA[#[import modules::JSONLoggerModule output application/json ---
+{
+    payload: JSONLoggerModule::stringifyNonJSON(payload.body) 
+}]]]></json-logger:content>
+				</json-logger:logger>
+			
+</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>
