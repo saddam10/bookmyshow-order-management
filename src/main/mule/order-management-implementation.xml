@@ -127,10 +127,11 @@ ns ns0 http://localhost:8081/ticket-booking-service/
 	>
 		<json-logger:logger doc:name="Start Log" doc:id="7107b051-b0cd-4c94-b7d5-88a8dfad79ad" config-ref="JSON_Logger_Config" message="Request received for  SOAP operation Get Discount"/>
 		<set-variable
-			value="#[output application/java&#10;ns ns0 http://localhost:8081/ticket-booking-service/&#10;---&#10;payload.body.ns0#getDiscount.amountPayable]"
+			value="#[ns ns0 http://localhost:8081/ticket-booking-service/&#10;---&#10;payload.body.ns0#getDiscount.amountPayable]"
 			doc:name="amount"
 			doc:id="8d3e8472-9221-4383-ba93-fca4fb78f90e"
 			variableName="amount" />
+		<set-variable value="#[ns ns0 http://localhost:8081/ticket-booking-service/&#10;---&#10;payload.body.ns0#getDiscount.numberOfSeats]" doc:name="numberOf Seats" doc:id="765808f1-3818-4f98-9b31-64691494d134" variableName="numberOf Seats"/>
 		<db:select
 			doc:name="Get Discount Percentage"
 			doc:id="7d42119e-08ec-422a-8087-57c063e56105"
@@ -146,7 +147,7 @@ ns ns0 http://localhost:8081/ticket-booking-service/
 }]]]></db:input-parameters>
 		</db:select>
 		<set-variable
-			value="#[(vars.amount * (payload.discountPercentage[0] / 100) * 1.5) as Number]"
+			value='#[(vars.amount * (payload.discountPercentage[0] / 100 )) * ( vars."numberOf Seats" as Number)]'
 			doc:name="discountAmount"
 			doc:id="10eeb403-2c25-4895-a056-3b999555b608"
 			variableName="discountAmount" />
