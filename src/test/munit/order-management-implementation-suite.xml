@@ -63,6 +63,101 @@ assert_expression_payload::main({payload: payload, attributes: attributes, vars:
 			</munit-tools:verify-call>
 		</munit:validation>
 	</munit:test>
+	
+	<munit:test
+		name="DB-CONNECTIVITY-Book-Ticket-Error-Testing"
+		doc:id="ed8aa066-3991-414b-bd19-e81699af3873"
+		description="connectivity error"
+	>
+		<munit:behavior>
+			<munit-tools:mock-when
+				doc:name="Mock When DB:CONNECTIVITY"
+				doc:id="78346686-fd7e-46e6-a325-8da50c0f1cbb"
+				processor="db:insert"
+			>
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="db0c5713-009a-4421-af70-a263775da3e5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload
+						value="#[output application/java --- []]"
+						mediaType="application/java"
+						encoding="UTF-8" />
+					<munit-tools:error typeId="DB:CONNECTIVITY" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref
+				doc:name="Flow-ref to book-ticket"
+				doc:id="e3e70e84-c834-4b2e-b132-ef252388e172"
+				name="book-ticket" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call
+				doc:name="Verify call"
+				doc:id="e842e41e-ee4c-461b-9ee0-423935a69a0e"
+				processor="ee:transform"
+				atLeast="1"
+			>
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="443b3210-53e2-472b-8270-a71257816c3d" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+
+			</munit-tools:verify-call>
+
+		</munit:validation>
+	
+</munit:test>
+
+	<munit:test
+		name="DB-CONNECTIVITY-Check-Discount-Error-Testing"
+		doc:id="62ab8ae5-3046-4b68-b9dc-e1fb509ba0b9"
+		description="connectivity error"
+	>
+		<munit:behavior>
+			<munit-tools:mock-when
+				doc:name="Mock When DB:CONNECTIVITY"
+				doc:id="0fe44f2e-0a9d-464e-9cd6-f792a33b1344"
+				processor="db:select"
+			>
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="7d42119e-08ec-422a-8087-57c063e56105" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload
+						value="#[output application/java --- []]"
+						mediaType="application/java"
+						encoding="UTF-8" />
+					<munit-tools:error typeId="DB:CONNECTIVITY" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref
+				doc:name="Flow-ref to check-discount"
+				doc:id="23bb79fa-85f9-46c1-9e8c-d271ab36826f"
+				name="check-discount" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call
+				doc:name="Verify call"
+				doc:id="f5b86c53-75ed-41b2-a043-485bca6017ad"
+				processor="ee:transform"
+				atLeast="1"
+			>
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="527c9c5b-5037-4b6d-a535-903c7d9661fd" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+
+
+			</munit-tools:verify-call>
+
+		</munit:validation>
+	
+</munit:test>
 
 
 </mule>
